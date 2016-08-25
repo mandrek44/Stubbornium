@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -21,6 +22,73 @@ namespace Stubbornium
         void ClickButton<TResult>(Func<IWebDriver, TResult> expectedConditionAfterAction);
     }
 
+    public class StubbornConfiguration
+    {
+        public static StubbornConfiguration Default { get; } = BuildDefaultConfiguration();
+
+        public static StubbornConfiguration BuildDefaultConfiguration()
+        {
+            return new StubbornConfiguration()
+                .WaitForAjax()
+                .LogToConsole();
+        }
+
+        public List<Action<RemoteWebDriver>> BeforeDoActions { get; } =  new List<Action<RemoteWebDriver>>();
+
+        public ILogger Log { get; set; } = new EmptyLogger();
+    }
+
+    public interface ILogger
+    {
+        void Info(string message);
+        void Warning(string message);
+    }
+
+    public class EmptyLogger : ILogger
+    {
+        public void Info(string message)
+        {
+        }
+
+        public void Warning(string message)
+        {
+        }
+    }
+
+    public class ConsoleLogger : ILogger
+    {
+        public void Info(string message)
+        {
+            Console.WriteLine(message);
+        }
+
+        public void Warning(string message)
+        {
+            Console.WriteLine(message);
+        }
+    }
+
+    public static class StubbornConfigurationBuilderExtensions
+    {
+        public static StubbornConfiguration WaitForAjax(this StubbornConfiguration config)
+        {
+            config.BeforeDoActions.Add(driver=> driver.WaitForAjaxCompletion());
+            return config;
+        }
+
+        public static StubbornConfiguration WaitForLoaderFinish(this StubbornConfiguration config, By loaderSelector)
+        {
+            config.BeforeDoActions.Add(driver => Extensions.WaitFor(() => driver.IsElementMissing(loaderSelector), Extensions.DefaultWait));
+            return config;
+        }
+
+        public static StubbornConfiguration LogToConsole(this StubbornConfiguration config)
+        {
+            config.Log = new ConsoleLogger();
+            return config;
+        }
+    }
+
     public class StubbornWebElement : IClickable, IButtonClickable, ISearchContext
     {
         private readonly RemoteWebDriver _browser;
@@ -28,26 +96,27 @@ namespace Stubbornium
         private readonly By _selector;
         private readonly Func<IWebElement, bool> _collectionPredicate;
         private readonly int _elementIndex;
+        private readonly StubbornConfiguration _configuration;
 
-        public StubbornWebElement(RemoteWebDriver browser, ISearchContext parent, By selector, int elementIndex = 1) : this(browser, parent, selector, null, elementIndex)
+        public StubbornWebElement(RemoteWebDriver browser, ISearchContext parent, By selector, int elementIndex = 1, StubbornConfiguration configuration = null) : this(browser, parent, selector, null, elementIndex, configuration)
         {
         }
 
-        public StubbornWebElement(RemoteWebDriver browser, ISearchContext parent, By selector, Func<IWebElement, bool> collectionPredicate, int elementIndex)
+        public StubbornWebElement(RemoteWebDriver browser, ISearchContext parent, By selector, Func<IWebElement, bool> collectionPredicate, int elementIndex, StubbornConfiguration configuration)
         {
             _browser = browser;
             _parent = parent;
             _selector = selector;
             _collectionPredicate = collectionPredicate;
             _elementIndex = elementIndex;
+            _configuration = configuration ?? StubbornConfiguration.Default;
         }
 
-        public By Selector { get { return _selector; } }
+        public By Selector => _selector;
 
-        public RemoteWebDriver Browser
-        {
-            get { return _browser; }
-        }
+        public RemoteWebDriver Browser => _browser;
+
+        public StubbornFinder Find => new StubbornFinder(_browser, this);
 
         public IWebElement Element
         {
@@ -65,12 +134,7 @@ namespace Stubbornium
                 else
                     return _parent.FindElements(_selector).Where(_collectionPredicate).ElementAtOrDefault(_elementIndex);
             }
-        }
-
-        public StubbornFinder Find
-        {
-            get { return new StubbornFinder(_browser, this); }
-        }
+        }       
 
         public void SetText(string content)
         {
@@ -92,7 +156,7 @@ namespace Stubbornium
                 ExpectedConditions.ElementIsVisible(_selector));
         }
         
-                public void ClickButton<TResult>(Func<IWebDriver, TResult> expectedConditionAfterAction)
+        public void ClickButton<TResult>(Func<IWebDriver, TResult> expectedConditionAfterAction)
         {
             Do(
                 () => Element.ClickButton(),
@@ -108,25 +172,12 @@ namespace Stubbornium
                 ExpectedConditions.ElementIsVisible(_selector));
         }
 
-        //public void AssertIsVisible()
-        //{
-        //    Do(
-        //        () => Element.Displayed.ShouldBeTrue(),
-        //        _ => true,
-        //        ExpectedConditions.ElementIsVisible(_selector));
-        //}
-
         public void AssertIsMissing()
         {
             Do(
                 () => { },
                 browser => browser.IsElementMissing(_selector));
         }
-
-        //public void AssertExists(string message = "")
-        //{
-        //    Assert(e => e.ShouldNotBeNull(message) != null);
-        //}
 
         public void Assert(Func<IWebElement, bool> assertion)
         {
@@ -149,17 +200,19 @@ namespace Stubbornium
             [CallerMemberName] string caller = "",
             string logMessage = "")
         {
-            Do(_browser, seleniumAction, expectedConditionAfterAction, errorWaitCondition, maxRetries, caller);
+            Do(_browser, seleniumAction, expectedConditionAfterAction, errorWaitCondition, maxRetries, caller, _configuration);
         }
 
         public static void Do<TResult1, TResult2>(RemoteWebDriver browser, Action seleniumAction,
             Func<IWebDriver, TResult1> expectedConditionAfterAction,
             Func<IWebDriver, TResult2> errorWaitCondition = null,
             int maxRetries = 10,
-            [CallerMemberName] string caller = "")
+            [CallerMemberName] string caller = "",
+            StubbornConfiguration configuration = null)
         {
-            browser.WaitForAjaxCompletion();
-            Extensions.WaitFor(() => browser.IsElementMissing(By.Id("blockMessage")), Extensions.DefaultWait);
+            configuration = StubbornConfiguration.Default;
+
+            configuration.BeforeDoActions.ForEach(action => action(browser));
 
             var wait = new WebDriverWait(browser, WaitTime.Short.ToTimeSpan());
             int attemptNo = 0;
@@ -173,7 +226,7 @@ namespace Stubbornium
 
                 if (attemptNo > 0 && actionException != null && expectedConditionException == null)
                 {
-                    //_log.Warn("Action threw exception (\"{0}\") but excepted condition is met", actionException.Message);
+                    configuration.Log.Warning($"Action threw exception (\"{actionException.Message}\") but excepted condition is met");
                     return;
                 }
 
@@ -194,16 +247,16 @@ namespace Stubbornium
                     // Ignore wait errors - just try to perform the core action again
                 }
 
-                // _log.Warn("Repeating {0}", caller);
+                configuration.Log.Warning($"Repeating {caller}");
             }
         }
 
-        public IWebElement FindElement(By @by)
+        IWebElement ISearchContext.FindElement(By @by)
         {
             return Element.FindElement(@by);
         }
 
-        public ReadOnlyCollection<IWebElement> FindElements(By @by)
+        ReadOnlyCollection<IWebElement> ISearchContext.FindElements(By @by)
         {
             return Element.FindElements(@by);
         }
