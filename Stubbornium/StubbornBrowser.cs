@@ -11,9 +11,6 @@ namespace Stubbornium
             _browser = browser;
         }
 
-        public StubbornFinder Find
-        {
-            get { return new StubbornFinder(_browser, _browser); }
-        }
+        public StubbornFinder Find => new StubbornFinder(_browser, _browser);
     }
 }

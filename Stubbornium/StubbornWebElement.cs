@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -9,86 +8,10 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Remote;
 using OpenQA.Selenium.Support.UI;
+using Stubbornium.Configuration;
 
 namespace Stubbornium
 {
-    public interface IClickable
-    {
-        void Click<TResult>(Func<IWebDriver, TResult> expectedConditionAfterAction);
-    }
-
-    public interface IButtonClickable
-    {
-        void ClickButton<TResult>(Func<IWebDriver, TResult> expectedConditionAfterAction);
-    }
-
-    public class StubbornConfiguration
-    {
-        public static StubbornConfiguration Default { get; } = BuildDefaultConfiguration();
-
-        public static StubbornConfiguration BuildDefaultConfiguration()
-        {
-            return new StubbornConfiguration()
-                .WaitForAjax()
-                .LogToConsole();
-        }
-
-        public List<Action<RemoteWebDriver>> BeforeDoActions { get; } =  new List<Action<RemoteWebDriver>>();
-
-        public ILogger Log { get; set; } = new EmptyLogger();
-    }
-
-    public interface ILogger
-    {
-        void Info(string message);
-        void Warning(string message);
-    }
-
-    public class EmptyLogger : ILogger
-    {
-        public void Info(string message)
-        {
-        }
-
-        public void Warning(string message)
-        {
-        }
-    }
-
-    public class ConsoleLogger : ILogger
-    {
-        public void Info(string message)
-        {
-            Console.WriteLine(message);
-        }
-
-        public void Warning(string message)
-        {
-            Console.WriteLine(message);
-        }
-    }
-
-    public static class StubbornConfigurationBuilderExtensions
-    {
-        public static StubbornConfiguration WaitForAjax(this StubbornConfiguration config)
-        {
-            config.BeforeDoActions.Add(driver=> driver.WaitForAjaxCompletion());
-            return config;
-        }
-
-        public static StubbornConfiguration WaitForLoaderFinish(this StubbornConfiguration config, By loaderSelector)
-        {
-            config.BeforeDoActions.Add(driver => Extensions.WaitFor(() => driver.IsElementMissing(loaderSelector), Extensions.DefaultWait));
-            return config;
-        }
-
-        public static StubbornConfiguration LogToConsole(this StubbornConfiguration config)
-        {
-            config.Log = new ConsoleLogger();
-            return config;
-        }
-    }
-
     public class StubbornWebElement : IClickable, IButtonClickable, ISearchContext
     {
         private readonly RemoteWebDriver _browser;
@@ -98,11 +21,12 @@ namespace Stubbornium
         private readonly int _elementIndex;
         private readonly StubbornConfiguration _configuration;
 
-        public StubbornWebElement(RemoteWebDriver browser, ISearchContext parent, By selector, int elementIndex = 1, StubbornConfiguration configuration = null) : this(browser, parent, selector, null, elementIndex, configuration)
+        public StubbornWebElement(By selector, RemoteWebDriver browser, ISearchContext parent = null, int elementIndex = 1, StubbornConfiguration configuration = null)
+            : this(selector, browser, parent ?? browser, null, elementIndex, configuration)
         {
         }
 
-        public StubbornWebElement(RemoteWebDriver browser, ISearchContext parent, By selector, Func<IWebElement, bool> collectionPredicate, int elementIndex, StubbornConfiguration configuration)
+        public StubbornWebElement(By selector, RemoteWebDriver browser, ISearchContext parent, Func<IWebElement, bool> collectionPredicate, int elementIndex, StubbornConfiguration configuration = null)
         {
             _browser = browser;
             _parent = parent;
@@ -134,7 +58,7 @@ namespace Stubbornium
                 else
                     return _parent.FindElements(_selector).Where(_collectionPredicate).ElementAtOrDefault(_elementIndex);
             }
-        }       
+        }
 
         public void SetText(string content)
         {
@@ -143,7 +67,7 @@ namespace Stubbornium
                 {
                     Element.Clear();
                     Element.SendKeys(content);
-                },                
+                },
                 _ => Element.Value() == content,
                 ExpectedConditions.ElementIsVisible(_selector));
         }
@@ -155,7 +79,7 @@ namespace Stubbornium
                 expectedConditionAfterAction,
                 ExpectedConditions.ElementIsVisible(_selector));
         }
-        
+
         public void ClickButton<TResult>(Func<IWebDriver, TResult> expectedConditionAfterAction)
         {
             Do(
@@ -172,11 +96,28 @@ namespace Stubbornium
                 ExpectedConditions.ElementIsVisible(_selector));
         }
 
+        public void AssertExists(string message = "")
+        {
+            Assert(e =>
+            {
+                Assertions.AreNotEqual(null, e, message);
+                return true;
+            });
+        }
+
         public void AssertIsMissing()
         {
             Do(
                 () => { },
                 browser => browser.IsElementMissing(_selector));
+        }
+
+        public void AssertIsVisible()
+        {
+            Do(
+                () => Assertions.AreEqual(true, Element.Displayed),
+                _ => true,
+                ExpectedConditions.ElementIsVisible(_selector));
         }
 
         public void Assert(Func<IWebElement, bool> assertion)

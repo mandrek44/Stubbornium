@@ -49,12 +49,20 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assertions.cs" />
+    <Compile Include="Configuration\ConsoleLogger.cs" />
+    <Compile Include="Configuration\EmptyLogger.cs" />
     <Compile Include="Example.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="ClickableExtensions.cs" />
+    <Compile Include="IButtonClickable.cs" />
+    <Compile Include="IClickable.cs" />
+    <Compile Include="Configuration\ILogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SeleniumExtensions.cs" />
     <Compile Include="StubbornBrowser.cs" />
+    <Compile Include="Configuration\StubbornConfiguration.cs" />
+    <Compile Include="Configuration\StubbornConfigurationBuilderExtensions.cs" />
     <Compile Include="StubbornFinder.cs" />
     <Compile Include="StubbornWebElement.cs" />
     <Compile Include="WaitTime.cs" />
@@ -63,6 +71,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
