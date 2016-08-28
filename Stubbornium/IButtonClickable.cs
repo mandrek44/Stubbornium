@@ -5,6 +5,6 @@ namespace Stubbornium
 {
     public interface IButtonClickable
     {
-        void ClickButton<TResult>(Func<IWebDriver, TResult> expectedConditionAfterAction);
+        void ClickButton<TResult>(Func<IWebElement, TResult> expectedConditionAfterAction);
     }
 }

@@ -1,6 +1,9 @@
+using System;
 using System.Linq;
 using OpenQA.Selenium;
+using OpenQA.Selenium.Internal;
 using OpenQA.Selenium.Remote;
+using OpenQA.Selenium.Support.UI;
 
 namespace Stubbornium
 {
@@ -42,6 +45,25 @@ namespace Stubbornium
         public static string Value(this IWebElement el)
         {
             return el.GetAttribute("value");
+        }
+
+        public static TResult Until<TResult>(this IWait<IWebDriver> wait, Func<IWebElement, TResult> condition, Func<IWebElement> elementSource )
+        {
+            return wait.Until(_ => condition(elementSource()));
+        }
+
+        public static IWebDriver Driver(this IWebElement webElement)
+        {
+            var wrapsDriver = webElement as IWrapsDriver;
+            if (wrapsDriver != null)
+                return wrapsDriver.WrappedDriver;
+
+            throw new InvalidOperationException("webElement must implement IWrapsDriver");
+        }
+
+        public static Func<IWebElement, TResult> ByWebElement<TResult>(this Func<IWebDriver, TResult> condition)
+        {
+            return webElement => condition(webElement.Driver());
         }
     }
 }

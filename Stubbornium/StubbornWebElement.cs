@@ -6,13 +6,14 @@ using System.Runtime.ExceptionServices;
 using System.Threading;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
+using OpenQA.Selenium.Internal;
 using OpenQA.Selenium.Remote;
 using OpenQA.Selenium.Support.UI;
 using Stubbornium.Configuration;
 
 namespace Stubbornium
 {
-    public class StubbornWebElement : IClickable, IButtonClickable, ISearchContext
+    public class StubbornWebElement : IClickable, IButtonClickable, ISearchContext, IWrapsDriver
     {
         private readonly RemoteWebDriver _browser;
         private readonly ISearchContext _parent;
@@ -20,6 +21,11 @@ namespace Stubbornium
         private readonly Func<IWebElement, bool> _collectionPredicate;
         private readonly int _elementIndex;
         private readonly StubbornConfiguration _configuration;
+
+        public StubbornWebElement(By selector, StubbornWebElement parent,int elementIndex = 1, StubbornConfiguration configuration = null)
+            : this(selector, parent._browser, parent._browser, null, elementIndex, configuration)
+        {
+        }
 
         public StubbornWebElement(By selector, RemoteWebDriver browser, ISearchContext parent = null, int elementIndex = 1, StubbornConfiguration configuration = null)
             : this(selector, browser, parent ?? browser, null, elementIndex, configuration)
@@ -35,14 +41,12 @@ namespace Stubbornium
             _elementIndex = elementIndex;
             _configuration = configuration ?? StubbornConfiguration.Default;
         }
-
+        
         public By Selector => _selector;
-
-        public RemoteWebDriver Browser => _browser;
 
         public StubbornFinder Find => new StubbornFinder(_browser, this);
 
-        public IWebElement Element
+        private IWebElement Element
         {
             get
             {
@@ -63,35 +67,35 @@ namespace Stubbornium
         public void SetText(string content)
         {
             Do(
-                () =>
+                element =>
                 {
-                    Element.Clear();
-                    Element.SendKeys(content);
+                    element.Clear();
+                    element.SendKeys(content);
                 },
                 _ => Element.Value() == content,
                 ExpectedConditions.ElementIsVisible(_selector));
         }
 
-        public void Click<TResult>(Func<IWebDriver, TResult> expectedConditionAfterAction)
+        public void Click<TResult>(Func<IWebElement, TResult> expectedConditionAfterAction)
         {
             Do(
-                () => Element.Click(),
+                element => element.Click(),
                 expectedConditionAfterAction,
                 ExpectedConditions.ElementIsVisible(_selector));
         }
 
-        public void ClickButton<TResult>(Func<IWebDriver, TResult> expectedConditionAfterAction)
+        public void ClickButton<TResult>(Func<IWebElement, TResult> expectedConditionAfterAction)
         {
             Do(
-                () => Element.ClickButton(),
+                element => element.ClickButton(),
                 expectedConditionAfterAction,
                 ExpectedConditions.ElementIsVisible(_selector));
         }
 
-        public void RightClick<TResult>(Func<IWebDriver, TResult> expectedConditionAfterAction)
+        public void RightClick<TResult>(Func<IWebElement, TResult> expectedConditionAfterAction)
         {
             Do(
-                () => new Actions(_browser).ContextClick(Element).Build().Perform(),
+                element => new Actions(element.Driver()).ContextClick(element).Build().Perform(),
                 expectedConditionAfterAction,
                 ExpectedConditions.ElementIsVisible(_selector));
         }
@@ -108,44 +112,46 @@ namespace Stubbornium
         public void AssertIsMissing()
         {
             Do(
-                () => { },
-                browser => browser.IsElementMissing(_selector));
+                _ => { },
+                element => element.Driver().IsElementMissing(_selector));
         }
 
         public void AssertIsVisible()
         {
             Do(
-                () => Assertions.AreEqual(true, Element.Displayed),
+                element => Assertions.AreEqual(true, element.Displayed),
                 _ => true,
                 ExpectedConditions.ElementIsVisible(_selector));
         }
 
         public void Assert(Func<IWebElement, bool> assertion)
         {
-            Do(() => { },
+            Do( _ => { },
                 _ => assertion(Element));
         }
 
-        public void Do<TResult>(Action seleniumAction,
-            Func<IWebDriver, TResult> expectedConditionAfterAction,
+        public void Do<TResult>(Action<IWebElement> seleniumAction,
+            Func<IWebElement, TResult> expectedConditionAfterAction,
             int maxRetries = 10,
             [CallerMemberName] string caller = "")
         {
             Do(seleniumAction, expectedConditionAfterAction, (Func<IWebDriver, bool>)null, maxRetries, caller);
         }
 
-        public void Do<TResult1, TResult2>(Action seleniumAction,
-            Func<IWebDriver, TResult1> expectedConditionAfterAction,
+        public void Do<TResult1, TResult2>(Action<IWebElement> seleniumAction,
+            Func<IWebElement, TResult1> expectedConditionAfterAction,
             Func<IWebDriver, TResult2> errorWaitCondition = null,
             int maxRetries = 10,
             [CallerMemberName] string caller = "",
             string logMessage = "")
         {
-            Do(_browser, seleniumAction, expectedConditionAfterAction, errorWaitCondition, maxRetries, caller, _configuration);
+            Do(_browser, () => Element, seleniumAction, expectedConditionAfterAction, errorWaitCondition, maxRetries, caller, _configuration);
         }
 
-        public static void Do<TResult1, TResult2>(RemoteWebDriver browser, Action seleniumAction,
-            Func<IWebDriver, TResult1> expectedConditionAfterAction,
+        public static void Do<TResult1, TResult2>(RemoteWebDriver browser, 
+            Func<IWebElement>  webElementSource,
+            Action<IWebElement> seleniumAction,
+            Func<IWebElement, TResult1> expectedConditionAfterAction,
             Func<IWebDriver, TResult2> errorWaitCondition = null,
             int maxRetries = 10,
             [CallerMemberName] string caller = "",
@@ -159,8 +165,8 @@ namespace Stubbornium
             int attemptNo = 0;
             while (true)
             {
-                var actionException = Try(seleniumAction);
-                var expectedConditionException = Try(() => wait.Until(expectedConditionAfterAction));
+                var actionException = Try(() => seleniumAction(webElementSource()));
+                var expectedConditionException = Try(() => wait.Until(expectedConditionAfterAction, webElementSource));
 
                 if (actionException == null && expectedConditionException == null)
                     return;
@@ -201,6 +207,8 @@ namespace Stubbornium
         {
             return Element.FindElements(@by);
         }
+
+        IWebDriver IWrapsDriver.WrappedDriver => _browser;
 
         private static Exception Try(Action action)
         {
