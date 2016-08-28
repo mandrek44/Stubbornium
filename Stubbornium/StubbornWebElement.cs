@@ -22,7 +22,7 @@ namespace Stubbornium
         private readonly int _elementIndex;
         private readonly StubbornConfiguration _configuration;
 
-        public StubbornWebElement(By selector, StubbornWebElement parent,int elementIndex = 1, StubbornConfiguration configuration = null)
+        public StubbornWebElement(By selector, StubbornWebElement parent, int elementIndex = 1, StubbornConfiguration configuration = null)
             : this(selector, parent._browser, parent._browser, null, elementIndex, configuration)
         {
         }
@@ -143,9 +143,13 @@ namespace Stubbornium
             Func<IWebDriver, TResult2> errorWaitCondition = null,
             int maxRetries = 10,
             [CallerMemberName] string caller = "",
-            string logMessage = "")
+            string logMessage = null)
         {
-            Do(_browser, () => Element, seleniumAction, expectedConditionAfterAction, errorWaitCondition, maxRetries, caller, _configuration);
+            var fullLogMessage = $"{caller} - {_selector}";
+            if (logMessage != null)
+                fullLogMessage += " - " + logMessage;
+
+            Do(_browser, () => Element, seleniumAction, expectedConditionAfterAction, errorWaitCondition, maxRetries, caller, _configuration, fullLogMessage);
         }
 
         public static void Do<TResult1, TResult2>(RemoteWebDriver browser, 
@@ -155,9 +159,12 @@ namespace Stubbornium
             Func<IWebDriver, TResult2> errorWaitCondition = null,
             int maxRetries = 10,
             [CallerMemberName] string caller = "",
-            StubbornConfiguration configuration = null)
+            StubbornConfiguration configuration = null,
+            string logMessage = null)
         {
-            configuration = StubbornConfiguration.Default;
+            configuration = configuration ?? StubbornConfiguration.Default;
+            
+            configuration.Log.Info(logMessage ?? caller);
 
             configuration.BeforeDoActions.ForEach(action => action(browser));
 
