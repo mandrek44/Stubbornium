@@ -4,8 +4,30 @@
 <head>
     <meta charset="utf-8" />
     <title></title>
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s=" crossorigin="anonymous"></script>
 </head>
 <body>
 <h1>Test</h1>
+    <span id="change-title-panel">
+        <a id="change-title" href="#">Change title</a> <input type="text" id="new-title" value="Hello" />
+    </span>
+<a id="reset-title" href="#" style="display: none">Reset title</a>
+
+<script>
+    $(function () {
+        $('#change-title').click(function () {
+            $('h1').text($('#new-title').val());
+            $('#change-title-panel').hide();
+            $('#reset-title').show();
+        });
+        
+        $('#reset-title').click(function () {
+            $('h1').text("Test");
+            $('#change-title-panel').show();
+            $('#reset-title').hide();
+        });
+    });
+</script>
+
 </body>
 </html>

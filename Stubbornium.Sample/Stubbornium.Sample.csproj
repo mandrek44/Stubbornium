@@ -83,7 +83,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="H1Sample.cs" />
+    <Compile Include="BasicOperations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SampleConfig.cs" />
     <Compile Include="Utils\Startup.cs" />

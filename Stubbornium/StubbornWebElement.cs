@@ -73,7 +73,8 @@ namespace Stubbornium
                     element.SendKeys(content);
                 },
                 _ => Element.Value() == content,
-                ExpectedConditions.ElementIsVisible(_selector));
+                ExpectedConditions.ElementIsVisible(_selector),
+                logMessage: "\"" + content + "\"");
         }
 
         public void Click<TResult>(Func<IWebElement, TResult> expectedConditionAfterAction)
@@ -106,14 +107,12 @@ namespace Stubbornium
             {
                 Assertions.AreNotEqual(null, e, message);
                 return true;
-            });
+            }, message ?? "Exists");
         }
 
         public void AssertIsMissing()
         {
-            Do(
-                _ => { },
-                element => element.Driver().IsElementMissing(_selector));
+            Assert(element => element.Driver().IsElementMissing(_selector), "Is missing");
         }
 
         public void AssertIsVisible()
@@ -121,21 +120,29 @@ namespace Stubbornium
             Do(
                 element => Assertions.AreEqual(true, element.Displayed),
                 _ => true,
-                ExpectedConditions.ElementIsVisible(_selector));
+                ExpectedConditions.ElementIsVisible(_selector),
+                logMessage: "Is visible");
         }
 
-        public void Assert(Func<IWebElement, bool> assertion)
+        public void AssertHasText(string expectedText)
+        {
+            Assert(e => e.Text == expectedText, $"Has text \"{expectedText}\"");
+        }
+
+        public void Assert(Func<IWebElement, bool> assertion, string logMessage)
         {
             Do( _ => { },
-                _ => assertion(Element));
+                _ => assertion(Element),
+                logMessage: logMessage);
         }
 
         public void Do<TResult>(Action<IWebElement> seleniumAction,
             Func<IWebElement, TResult> expectedConditionAfterAction,
             int maxRetries = 10,
-            [CallerMemberName] string caller = "")
+            [CallerMemberName] string caller = "",
+            string logMessage = null)
         {
-            Do(seleniumAction, expectedConditionAfterAction, (Func<IWebDriver, bool>)null, maxRetries, caller);
+            Do(seleniumAction, expectedConditionAfterAction, (Func<IWebDriver, bool>)null, maxRetries, caller, logMessage);
         }
 
         public void Do<TResult1, TResult2>(Action<IWebElement> seleniumAction,

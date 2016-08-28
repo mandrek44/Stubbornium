@@ -8,10 +8,24 @@ namespace Stubbornium
 {
     public static class ClickableExtensions
     {
-        public static StubbornWebElement ClickToOpen(this StubbornWebElement element, By expectedPopupElement)
+        public static StubbornWebElement ClickToAppear(this StubbornWebElement element, By expectedPopupElement,
+            Func<IWebElement, bool> predicate = null)
         {
-            element.Click(ExpectedConditions.ElementIsVisible(expectedPopupElement).ByWebElement());
+            return ClickToOpen(element, expectedPopupElement, predicate);
+        }
+
+        public static StubbornWebElement ClickToOpen(this StubbornWebElement element, By expectedPopupElement,
+            Func<IWebElement, bool> predicate = null)
+        {
+            element.Click(webElement => ElementIsVisible(webElement.Driver(), expectedPopupElement, predicate));
             return new StubbornWebElement(expectedPopupElement, element);
+        }
+
+        private static bool ElementIsVisible(IWebDriver driver, By selector, Func<IWebElement, bool> predicate)
+        {
+            predicate = predicate ?? (_ => true);
+            var webElement = driver.FindElement(selector);
+            return webElement.Displayed && predicate(webElement);
         }
 
         public static StubbornWebElement ClickToOpenFirstOf(this StubbornWebElement element, params By[] expectedPopupElements)
@@ -30,9 +44,17 @@ namespace Stubbornium
             element.Click(webElement => webElement.Driver().IsElementMissing(expectedMissingElement));
         }
 
-        public static StubbornWebElement ClickButtonToOpen(this StubbornWebElement element, By expectedPopupElement)
+        public static StubbornWebElement ClickButtonToAppear(this StubbornWebElement element, By expectedPopupElement,
+            Func<IWebElement, bool> predicate = null)
         {
-            element.ClickButton(ExpectedConditions.ElementIsVisible(expectedPopupElement).ByWebElement());
+            return ClickButtonToOpen(element, expectedPopupElement, predicate);
+        }
+
+        public static StubbornWebElement ClickButtonToOpen(this StubbornWebElement element, By expectedPopupElement,
+            Func<IWebElement, bool> predicate = null)
+        {
+            element.ClickButton(webElement => ElementIsVisible(webElement.Driver(), expectedPopupElement, predicate));
+
             return new StubbornWebElement(expectedPopupElement, element);
         }
 
@@ -43,9 +65,16 @@ namespace Stubbornium
             element.ClickButton(webElement => webElement.Driver().IsElementMissing(expectedMissingElement));
         }
 
-        public static StubbornWebElement RightClickToOpen(this StubbornWebElement element, By expectedPopupElement)
+        public static StubbornWebElement RightClickToAppear(this StubbornWebElement element, By expectedPopupElement,
+            Func<IWebElement, bool> predicate = null)
         {
-            element.RightClick(ExpectedConditions.ElementIsVisible(expectedPopupElement).ByWebElement());
+            return RightClickToOpen(element, expectedPopupElement, predicate);
+        }
+
+        public static StubbornWebElement RightClickToOpen(this StubbornWebElement element, By expectedPopupElement,
+            Func<IWebElement, bool> predicate = null)
+        {
+            element.RightClick(webElement => ElementIsVisible(webElement.Driver(), expectedPopupElement, predicate));
             return new StubbornWebElement(expectedPopupElement, element);
         }
 
