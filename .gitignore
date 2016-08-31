@@ -1,7 +1,7 @@
 .vs/
 .fake/
 nugetPackage/
-
+tools/
 *.nupkg
 
 
