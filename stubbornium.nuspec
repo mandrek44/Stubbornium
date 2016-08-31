@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">    
+  <id>Stubbornium</id>
+  <version>@build.number@</version>
+  <authors>Mandro</authors>
+  <owners>Mandro</owners>
+  <summary>Library for robust UI test</summary>
+  <licenseUrl>https://github.com/mandrek44/Stubbornium/blob/master/LICENSE</licenseUrl>
+  <projectUrl>https://github.com/mandrek44/Stubbornium/</projectUrl>
+  <iconUrl>https://chocolatey.org/content/packageimages/NugetPackageExplorer.3.18.png</iconUrl>
+  <requireLicenseAcceptance>false</requireLicenseAcceptance>
+  <description>Library for robust UI test</description>
+  <releaseNotes></releaseNotes>
+  <copyright>Copyright Mandro 2016</copyright>    
+  <tags>Selenium Testing</tags>
+  @dependencies@
+  @references@
+  </metadata>
+  @files@
+</package>
