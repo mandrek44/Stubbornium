@@ -109,3 +109,23 @@ SetText - By.Id: new-title - "Better title"
 Click - By.Id: change-title
 Assert - By.TagName: h1 - Has text "Better title"
 ```
+
+
+# Building from sources
+
+To build Stubbornium use `build.cmd`.
+
+To show all possible targets:
+```
+build.cmd
+```
+
+To build project:
+```
+build.cmd Build
+```
+
+Optionally, you can support `Configuration` parameter:
+```
+build.cmd Build Configuration=Debug
+```
