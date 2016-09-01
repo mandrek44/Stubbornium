@@ -1,10 +1,12 @@
+using OpenQA.Selenium;
+using OpenQA.Selenium.Internal;
 using OpenQA.Selenium.Remote;
 
 namespace Stubbornium
 {
-    public class StubbornBrowser
+    public class StubbornBrowser : IWrapsDriver
     {
-        readonly RemoteWebDriver _browser;
+        private readonly RemoteWebDriver _browser;
 
         public StubbornBrowser(RemoteWebDriver browser)
         {
@@ -12,5 +14,7 @@ namespace Stubbornium
         }
 
         public StubbornFinder Find => new StubbornFinder(_browser, _browser);
+
+        IWebDriver IWrapsDriver.WrappedDriver => _browser;
     }
 }

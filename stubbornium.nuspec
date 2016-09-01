@@ -17,5 +17,7 @@
   @dependencies@
   @references@
   </metadata>
-  @files@
+  <files>
+    <file src="Stubbornium.dll" target="lib\net45" />
+  </files>
 </package>

@@ -17,7 +17,7 @@ namespace Stubbornium
         public static StubbornWebElement ClickToOpen(this StubbornWebElement element, By expectedPopupElement,
             Func<IWebElement, bool> predicate = null)
         {
-            element.Click(webElement => ElementIsVisible(webElement.Driver(), expectedPopupElement, predicate));
+            element.Click(webElement => ElementIsVisible(webElement().Driver(), expectedPopupElement, predicate));
             return new StubbornWebElement(expectedPopupElement, element);
         }
 
@@ -30,7 +30,7 @@ namespace Stubbornium
 
         public static StubbornWebElement ClickToOpenFirstOf(this StubbornWebElement element, params By[] expectedPopupElements)
         {
-            element.Click(webElement => expectedPopupElements.Any(selector => IsDisplayedSafe(() => webElement.Driver().FindElement(selector))));
+            element.Click(webElement => expectedPopupElements.Any(selector => IsDisplayedSafe(() => webElement().Driver().FindElement(selector))));
 
             var displayedPopupElement = expectedPopupElements.First(selector => IsDisplayedSafe(() => GetDriver(element).FindElement(selector)));
 
@@ -41,7 +41,7 @@ namespace Stubbornium
         {
             if (expectedMissingElement == null)
                 expectedMissingElement = element.Selector;
-            element.Click(webElement => webElement.Driver().IsElementMissing(expectedMissingElement));
+            element.Click(_ => ExpectedConditions.InvisibilityOfElementLocated(expectedMissingElement));
         }
 
         public static StubbornWebElement ClickButtonToAppear(this StubbornWebElement element, By expectedPopupElement,
@@ -53,7 +53,7 @@ namespace Stubbornium
         public static StubbornWebElement ClickButtonToOpen(this StubbornWebElement element, By expectedPopupElement,
             Func<IWebElement, bool> predicate = null)
         {
-            element.ClickButton(webElement => ElementIsVisible(webElement.Driver(), expectedPopupElement, predicate));
+            element.ClickButton(webElement => ElementIsVisible(webElement().Driver(), expectedPopupElement, predicate));
 
             return new StubbornWebElement(expectedPopupElement, element);
         }
@@ -62,7 +62,7 @@ namespace Stubbornium
         {
             if (expectedMissingElement == null)
                 expectedMissingElement = element.Selector;
-            element.ClickButton(webElement => webElement.Driver().IsElementMissing(expectedMissingElement));
+            element.ClickButton(_ => ExpectedConditions.InvisibilityOfElementLocated(expectedMissingElement));
         }
 
         public static StubbornWebElement RightClickToAppear(this StubbornWebElement element, By expectedPopupElement,
@@ -74,7 +74,7 @@ namespace Stubbornium
         public static StubbornWebElement RightClickToOpen(this StubbornWebElement element, By expectedPopupElement,
             Func<IWebElement, bool> predicate = null)
         {
-            element.RightClick(webElement => ElementIsVisible(webElement.Driver(), expectedPopupElement, predicate));
+            element.RightClick(webElement => ElementIsVisible(webElement().Driver(), expectedPopupElement, predicate));
             return new StubbornWebElement(expectedPopupElement, element);
         }
 

@@ -1,7 +1,9 @@
 ﻿using System;
 using Microsoft.Owin.Hosting;
 using NUnit.Framework;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.UI;
 using Stubbornium.Configuration;
 using Stubbornium.Sample.Utils;
 
@@ -26,6 +28,7 @@ namespace Stubbornium.Sample
         public void StartWebDriver()
         {
             StubbornConfiguration.Default.Log = new ConsoleLogger();
+            StubbornConfiguration.Default.WaitForAjax();
 
             WebDriver = new ChromeDriver();
             Browser = new StubbornBrowser(WebDriver);

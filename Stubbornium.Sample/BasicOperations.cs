@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using OpenQA.Selenium;
+using OpenQA.Selenium.Support.UI;
 using Stubbornium.Sample.Utils;
 
 namespace Stubbornium.Sample
@@ -17,7 +18,7 @@ namespace Stubbornium.Sample
         public void Assert_title_after_load()
         {
             Browser.Find.TagName("h1")
-                .Assert(element => element.Text == "Test", "H1 == Test");
+                .Assert(element => element().Text == "Test", "H1 == Test");
         }
 
         [Test]
@@ -27,10 +28,12 @@ namespace Stubbornium.Sample
                 .AssertHasText("Test");
 
             Browser.Find.Id("change-title")
-                .Click(element => element.Driver().FindElement(By.TagName("h1")).Text == "Hello");
+                .Click(element => element().Driver().FindElement(By.TagName("h1")).Text == "Hello");
 
             Browser.Find.TagName("h1")
                 .AssertHasText("Hello");
+
+            Browser.Find.Id("").Click(ExpectedConditions.InvisibilityOfElementLocated(By.Id("")).ByWebElement(Browser));
         }
 
         [Test]

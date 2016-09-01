@@ -12,8 +12,8 @@ namespace Stubbornium
         }
 
         public static void AreNotEqual(object expected, object actual, string message = null)
-        {
-            if (expected.Equals(actual))
+        {            
+            if ((expected == null && actual == null) || (expected != null && expected.Equals(actual)))
                 throw AssertionException.NotEqualException(expected.ToString(), actual.ToString(), message ?? string.Empty);
         }
 

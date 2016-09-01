@@ -8,7 +8,7 @@ let version = getBuildParamOrDefault "Version" "1.0.0.0"
 let packagingDir = __SOURCE_DIRECTORY__ @@ "nugetPackage"
 let stubborniumDir = __SOURCE_DIRECTORY__ @@ "Stubbornium/bin" @@ configuration
 let toolsDir = __SOURCE_DIRECTORY__ @@ "tools"
-let nuspecFile = __SOURCE_DIRECTORY__ @@ "stubbornium.nuspec"
+let nuspecFile = __SOURCE_DIRECTORY__ @@ "nugetPackage/stubbornium.nuspec"
 
 let runMsbuild (project: string) (target: string) =
     let setParams (p: MSBuildParams) = 
@@ -28,18 +28,18 @@ Target "Build" (fun _ ->
 )
 
 Target "CopyForPackaging" (fun _ ->
-    !! (stubborniumDir @@ "*.*")
+    !! (stubborniumDir @@ "Stubbornium.dll")
     |> Copy packagingDir        
 
-    !! nuspecFile
+    !! (__SOURCE_DIRECTORY__ @@ "stubbornium.nuspec")
     |> Copy packagingDir        
 )
 
 Target "CreatePackage" (fun _ ->
            
     NuGet (fun p -> 
-        {p with             
-            Project = "Stubbornium"           
+        {p with         
+                   
             OutputPath = __SOURCE_DIRECTORY__          
             WorkingDir = packagingDir
             Version = version            
@@ -48,6 +48,7 @@ Target "CreatePackage" (fun _ ->
             Dependencies =  // fallback - for all unspecified frameworks
                 ["Selenium.WebDriver", GetPackageVersion "./packages/" "Selenium.WebDriver"
                  "Selenium.Support", GetPackageVersion "./packages/" "Selenium.Support"]
+
         }) 
         nuspecFile
 )

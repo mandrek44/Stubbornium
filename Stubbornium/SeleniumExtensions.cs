@@ -34,6 +34,10 @@ namespace Stubbornium
             {
                 return true;
             }
+            catch (StaleElementReferenceException)
+            {
+                return true;
+            }
         }
 
         public static IWebElement ClickButton(this IWebElement el)
@@ -47,9 +51,9 @@ namespace Stubbornium
             return el.GetAttribute("value");
         }
 
-        public static TResult Until<TResult>(this IWait<IWebDriver> wait, Func<IWebElement, TResult> condition, Func<IWebElement> elementSource )
+        public static TResult Until<TResult>(this IWait<IWebDriver> wait, Func<Func<IWebElement>, TResult> condition, Func<IWebElement> elementSource )
         {
-            return wait.Until(_ => condition(elementSource()));
+            return wait.Until(_ => condition(elementSource));
         }
 
         public static IWebDriver Driver(this IWebElement webElement)
@@ -61,9 +65,14 @@ namespace Stubbornium
             throw new InvalidOperationException("webElement must implement IWrapsDriver");
         }
 
-        public static Func<IWebElement, TResult> ByWebElement<TResult>(this Func<IWebDriver, TResult> condition)
+        //public static Func<Func<IWebElement>, TResult> ByWebElement<TResult>(this Func<IWebDriver, TResult> condition)
+        //{
+        //    return webElement => condition(webElement().Driver());
+        //}
+
+        public static Func<Func<IWebElement>, TResult> ByWebElement<TResult>(this Func<IWebDriver, TResult> condition, IWrapsDriver browser)
         {
-            return webElement => condition(webElement.Driver());
+            return webElement => condition(browser.WrappedDriver);
         }
     }
 }

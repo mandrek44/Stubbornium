@@ -69,34 +69,34 @@ namespace Stubbornium
             Do(
                 element =>
                 {
-                    element.Clear();
-                    element.SendKeys(content);
+                    element().Clear();
+                    element().SendKeys(content);
                 },
                 _ => Element.Value() == content,
                 ExpectedConditions.ElementIsVisible(_selector),
                 logMessage: "\"" + content + "\"");
         }
 
-        public void Click<TResult>(Func<IWebElement, TResult> expectedConditionAfterAction)
+        public void Click<TResult>(Func<Func<IWebElement>, TResult> expectedConditionAfterAction)
         {
             Do(
-                element => element.Click(),
+                element => element().Click(),
                 expectedConditionAfterAction,
                 ExpectedConditions.ElementIsVisible(_selector));
         }
 
-        public void ClickButton<TResult>(Func<IWebElement, TResult> expectedConditionAfterAction)
+        public void ClickButton<TResult>(Func<Func<IWebElement>, TResult> expectedConditionAfterAction)
         {
             Do(
-                element => element.ClickButton(),
+                element => element().ClickButton(),
                 expectedConditionAfterAction,
                 ExpectedConditions.ElementIsVisible(_selector));
         }
 
-        public void RightClick<TResult>(Func<IWebElement, TResult> expectedConditionAfterAction)
+        public void RightClick<TResult>(Func<Func<IWebElement>, TResult> expectedConditionAfterAction)
         {
             Do(
-                element => new Actions(element.Driver()).ContextClick(element).Build().Perform(),
+                element => new Actions(element().Driver()).ContextClick(element()).Build().Perform(),
                 expectedConditionAfterAction,
                 ExpectedConditions.ElementIsVisible(_selector));
         }
@@ -112,13 +112,13 @@ namespace Stubbornium
 
         public void AssertIsMissing()
         {
-            Assert(element => element.Driver().IsElementMissing(_selector), "Is missing");
+            Assert(element => _browser.IsElementMissing(_selector), "Is missing");
         }
 
         public void AssertIsVisible()
         {
             Do(
-                element => Assertions.AreEqual(true, element.Displayed),
+                element => Assertions.AreEqual(true, element().Displayed),
                 _ => true,
                 ExpectedConditions.ElementIsVisible(_selector),
                 logMessage: "Is visible");
@@ -126,18 +126,18 @@ namespace Stubbornium
 
         public void AssertHasText(string expectedText)
         {
-            Assert(e => e.Text == expectedText, $"Has text \"{expectedText}\"");
+            Assert(e => e().Text == expectedText, $"Has text \"{expectedText}\"");
         }
 
-        public void Assert(Func<IWebElement, bool> assertion, string logMessage)
+        public void Assert(Func<Func<IWebElement>, bool> assertion, string logMessage)
         {
             Do( _ => { },
-                _ => assertion(Element),
+                _ => assertion(() => Element),
                 logMessage: logMessage);
         }
 
-        public void Do<TResult>(Action<IWebElement> seleniumAction,
-            Func<IWebElement, TResult> expectedConditionAfterAction,
+        public void Do<TResult>(Action<Func<IWebElement>> seleniumAction,
+            Func<Func<IWebElement>, TResult> expectedConditionAfterAction,
             int maxRetries = 10,
             [CallerMemberName] string caller = "",
             string logMessage = null)
@@ -145,8 +145,8 @@ namespace Stubbornium
             Do(seleniumAction, expectedConditionAfterAction, (Func<IWebDriver, bool>)null, maxRetries, caller, logMessage);
         }
 
-        public void Do<TResult1, TResult2>(Action<IWebElement> seleniumAction,
-            Func<IWebElement, TResult1> expectedConditionAfterAction,
+        public void Do<TResult1, TResult2>(Action<Func<IWebElement>> seleniumAction,
+            Func<Func<IWebElement>, TResult1> expectedConditionAfterAction,
             Func<IWebDriver, TResult2> errorWaitCondition = null,
             int maxRetries = 10,
             [CallerMemberName] string caller = "",
@@ -161,8 +161,8 @@ namespace Stubbornium
 
         public static void Do<TResult1, TResult2>(RemoteWebDriver browser, 
             Func<IWebElement>  webElementSource,
-            Action<IWebElement> seleniumAction,
-            Func<IWebElement, TResult1> expectedConditionAfterAction,
+            Action<Func<IWebElement>> seleniumAction,
+            Func<Func<IWebElement>, TResult1> expectedConditionAfterAction,
             Func<IWebDriver, TResult2> errorWaitCondition = null,
             int maxRetries = 10,
             [CallerMemberName] string caller = "",
@@ -179,7 +179,7 @@ namespace Stubbornium
             int attemptNo = 0;
             while (true)
             {
-                var actionException = Try(() => seleniumAction(webElementSource()));
+                var actionException = Try(() => seleniumAction(webElementSource));
                 var expectedConditionException = Try(() => wait.Until(expectedConditionAfterAction, webElementSource));
 
                 if (actionException == null && expectedConditionException == null)
