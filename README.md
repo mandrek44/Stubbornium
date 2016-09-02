@@ -39,8 +39,9 @@ Example: verifying element's content:
 ```csharp
 browser
     .Find.TagName("h1")
-    .Assert(element => element.Text == "Test", "H1 contains \"Test\"");
+    .Assert(element => element().Text == "Test", "H1 contains \"Test\"");
 ```
+Notice that parameter `element` in lambda is not the actual selenium `IWebElement` but a `Func<IWebElement>` that let you evaluate the element by calling it. Stubbornium will not evaluate the Element until this function is called.
 
 There's a shorthand method for asserting text:
 
@@ -52,14 +53,14 @@ browser
 
 ## Clicking
 
-When performing any action on the element, stubbornium requires to define what should happen after the action. This information is used to call Selenium wait but also to reiterate if the condition is not met. Similiary to Assertions, Stubbornium tries to perform the action several times before throwing an exception.
+When performing any action on the element, Stubbornium requires to define what should happen after the action. This information is used to call Selenium wait but also to reiterate if the condition is not met. Similiary to assertions, Stubbornium tries to perform the failing action several times before throwing an exception.
 
-Example: clicking an element (i.e. to change it's content). 
+Example: clicking an element (i.e. to change it's content):
 
 ```csharp
 browser
     .Find.Id("change-title")
-    .Click(element => element.Driver().FindElement(By.TagName("h1")).Text == "Hello");
+    .Click(_ => browser.FindElement(By.TagName("h1")).Text == "Hello");
 ```
 
 Again there's a shorthand version that does exactly the same thing:
@@ -91,9 +92,9 @@ browser
 
 ## Hooking to actions
 
-Stubbornium gives an option to run code before every action (`Click`, `Assert` etc). 
+Global static `StubbornConfiguration.Default` can be used to set various settings used thoughout the library. For example, Stubbornium gives an option to run code before every action (`Click`, `Assert` etc). 
 
-For example, to wait for loading element to dissapear before executing action:
+To wait for loading element to dissapear before executing action:
 
 ```csharp
 StubbornConfiguration.Default.BeforeDoActions.Add(driver =>
@@ -105,13 +106,13 @@ StubbornConfiguration.Default.BeforeDoActions.Add(driver =>
 
 There are some predefined actions. The shorthand for above code is:
 
-```
+```csharp
 StubbornConfiguration.Default.WaitForLoaderFinish(By.Id("loading"));
 ```
 
 To wait for jQuery AJAX calls to complete you can use:
 
-```
+```csharp
 StubbornConfiguration.Default.WaitForAjax()
 ```
 ## Working samples
