@@ -14,7 +14,7 @@ You can install the package from NuGet:
 Install-Package Stubbornium
 ```
 
-## Basic usage
+# Basic usage
 
 After you initialize `IWebDriver` instance, you can wrap it with Stubbornium:
 
@@ -30,7 +30,7 @@ browser.Find.TagName("h1")
 
 *There's a notable difference between finding element with stubboriun and selenium. Selenium evaluates element immiediatly, where Stubboriun only saves the search pattern and will evaluate it when performing actions on the element (Click, Assert etc)*
 
-### Assertions
+## Assertions
 
 Assert method is used to check if element is in desired state. If it's not, or if even it doesn't exist Stubboriun will reevaluate the assertion for several seconds before throwing exception.
 
@@ -50,7 +50,7 @@ browser
     .AssertHasText("Test");
 ```
 
-### Clicking
+## Clicking
 
 When performing any action on the element, stubbornium requires to define what should happen after the action. This information is used to call Selenium wait but also to reiterate if the condition is not met. Similiary to Assertions, Stubbornium tries to perform the action several times before throwing an exception.
 
@@ -79,7 +79,7 @@ browser
     .ClickToClose();
 ```
         
-### Setting input values
+## Setting input values
 
 `SetText` can be used to manipulate inputs. Like in all cases, the Stubbornium verifies that the text was indeed set as expected:
 
@@ -88,12 +88,37 @@ browser
     .Find.Id("new-title")
     .SetText("Better title");
 ```
-        
-### Working samples
+
+## Hooking to actions
+
+Stubbornium gives an option to run code before every action (`Click`, `Assert` etc). 
+
+For example, to wait for loading element to dissapear before executing action:
+
+```csharp
+StubbornConfiguration.Default.BeforeDoActions.Add(driver =>
+{
+    var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+    wait.Until(ExpectedConditions.InvisibilityOfElementLocated(By.Id("loading")));
+});
+```
+
+There are some predefined actions. The shorthand for above code is:
+
+```
+StubbornConfiguration.Default.WaitForLoaderFinish(By.Id("loading"));
+```
+
+To wait for jQuery AJAX calls to complete you can use:
+
+```
+StubbornConfiguration.Default.WaitForAjax()
+```
+## Working samples
 
 You can find above and additional examples in the [Stubbornium.Sample](https://github.com/mandrek44/Stubbornium/tree/master/Stubbornium.Sample) project in Stubbornium repository.
 
-## Log output
+# Log output
 
 Stubbornium creates a detailed log of performed actions. To enable logging, you must configure logger:
 
@@ -108,4 +133,24 @@ Assert - By.TagName: h1 - Has text "Test"
 SetText - By.Id: new-title - "Better title"
 Click - By.Id: change-title
 Assert - By.TagName: h1 - Has text "Better title"
+```
+
+
+# Building from sources
+
+To build Stubbornium use `build.cmd`.
+
+To show all possible targets:
+```
+build.cmd
+```
+
+To build project:
+```
+build.cmd Build
+```
+
+Optionally, you can support `Configuration` parameter:
+```
+build.cmd Build Configuration=Debug
 ```
