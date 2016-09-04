@@ -4,7 +4,7 @@ Stubbornium is a .NET wrapper for Selenium API that enables you to write robust 
 
 Do your test runs randomly fail because some element was missing? Do you have `Thread.Sleep` call in your tests? Do you insert code for waiting for ajax completion in hope it will make test more stable?
 
- Stubbornium will give you a clean and simple interface for writing tests without worrying about all those aspects. 
+Stubbornium will give you a clean and simple interface for writing tests without worrying about all those aspects. 
 
 ## Install
 
@@ -13,6 +13,16 @@ You can install the package from NuGet:
 ```posh
 Install-Package Stubbornium
 ```
+
+## Principles
+
+Stubbornium implmentes following principles and hides them behind it's API:
+
+- Each interaction with page should define expected result (i.e. *"After I click the button a popup appears"*).
+- After the interaction, test should automatically wait for expected result.
+- If interaction fails, it should be repeated.
+- If expected condition is not met, interaction should be repeated.
+- Test should fail if repeating several times didn't help.
 
 # Basic usage
 
