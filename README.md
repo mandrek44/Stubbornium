@@ -1,4 +1,4 @@
-# Stubbornium
+# Stubbornium  ![NuGet](https://img.shields.io/nuget/v/Stubbornium.svg?maxAge=2592000)
 
 Stubbornium is a .NET wrapper for Selenium API that enables you to write robust and stable test for complex sites.
 
