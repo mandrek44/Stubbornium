@@ -6,14 +6,7 @@ namespace Stubbornium.Configuration
 {
     public class StubbornConfiguration
     {
-        public static StubbornConfiguration Default { get; } = BuildDefaultConfiguration();
-
-        public static StubbornConfiguration BuildDefaultConfiguration()
-        {
-            return new StubbornConfiguration()
-                .WaitForAjax()
-                .LogToConsole();
-        }
+        public static StubbornConfiguration Default { get; } = new StubbornConfiguration();
 
         public List<Action<RemoteWebDriver>> BeforeDoActions { get; } = new List<Action<RemoteWebDriver>>();
 

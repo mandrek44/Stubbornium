@@ -29,7 +29,7 @@ namespace Stubbornium.Sample
         [OneTimeSetUp]
         public void StartWebDriver()
         {
-            StubbornConfiguration.Default.Log = new ConsoleLogger();
+            StubbornConfiguration.Default.LogToConsole();
             StubbornConfiguration.Default.WaitForAjax();
 
             WebDriver = new ChromeDriver();
