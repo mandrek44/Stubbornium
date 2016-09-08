@@ -16,7 +16,10 @@
 <script>
     $(function () {
         $('#change-title').click(function () {
-            $('h1').text($('#new-title').val());
+            setTimeout(function () {
+                $('h1').text($('#new-title').val())
+            }, 2000);
+
             $('#change-title-panel').hide();
             $('#reset-title').show();
         });
