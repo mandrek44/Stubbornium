@@ -3,6 +3,8 @@ using Microsoft.Owin.Hosting;
 using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Firefox;
+using OpenQA.Selenium.Remote;
 using OpenQA.Selenium.Support.UI;
 using Stubbornium.Configuration;
 using Stubbornium.Sample.Utils;
@@ -14,7 +16,7 @@ namespace Stubbornium.Sample
     {
         public static IDisposable WebServer { get; private set; }
         public static StubbornBrowser Browser { get; private set; }
-        public static ChromeDriver WebDriver { get; private set; }
+        public static RemoteWebDriver WebDriver { get; private set; }
 
         public static string BaseAddress => "http://localhost:12345";
 

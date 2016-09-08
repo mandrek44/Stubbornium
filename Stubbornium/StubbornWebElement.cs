@@ -139,16 +139,18 @@ namespace Stubbornium
         public void Do<TResult>(Action<Func<IWebElement>> seleniumAction,
             Func<Func<IWebElement>, TResult> expectedConditionAfterAction,
             int maxRetries = 10,
+            WaitTime waitTime = WaitTime.Short,
             [CallerMemberName] string caller = "",
             string logMessage = null)
         {
-            Do(seleniumAction, expectedConditionAfterAction, (Func<IWebDriver, bool>)null, maxRetries, caller, logMessage);
+            Do(seleniumAction, expectedConditionAfterAction, (Func<IWebDriver, bool>)null, maxRetries, waitTime, caller, logMessage);
         }
 
         public void Do<TResult1, TResult2>(Action<Func<IWebElement>> seleniumAction,
             Func<Func<IWebElement>, TResult1> expectedConditionAfterAction,
             Func<IWebDriver, TResult2> errorWaitCondition = null,
             int maxRetries = 10,
+            WaitTime waitTime = WaitTime.Short,
             [CallerMemberName] string caller = "",
             string logMessage = null)
         {
@@ -156,7 +158,7 @@ namespace Stubbornium
             if (logMessage != null)
                 fullLogMessage += " - " + logMessage;
 
-            Do(_browser, () => Element, seleniumAction, expectedConditionAfterAction, errorWaitCondition, maxRetries, caller, _configuration, fullLogMessage);
+            Do(_browser, () => Element, seleniumAction, expectedConditionAfterAction, errorWaitCondition, maxRetries, waitTime, caller, _configuration, fullLogMessage);
         }
 
         public static void Do<TResult1, TResult2>(RemoteWebDriver browser, 
@@ -165,6 +167,7 @@ namespace Stubbornium
             Func<Func<IWebElement>, TResult1> expectedConditionAfterAction,
             Func<IWebDriver, TResult2> errorWaitCondition = null,
             int maxRetries = 10,
+            WaitTime waitTime = WaitTime.Short,
             [CallerMemberName] string caller = "",
             StubbornConfiguration configuration = null,
             string logMessage = null)
@@ -175,7 +178,7 @@ namespace Stubbornium
 
             configuration.BeforeDoActions.ForEach(action => action(browser));
 
-            var wait = new WebDriverWait(browser, WaitTime.Short.ToTimeSpan());
+            var wait = new WebDriverWait(browser, waitTime.ToTimeSpan());
             int attemptNo = 0;
             while (true)
             {
