@@ -10,6 +10,8 @@ namespace Stubbornium.Configuration
 
         public List<Action<RemoteWebDriver>> BeforeDoActions { get; } = new List<Action<RemoteWebDriver>>();
 
+        public List<Action<RemoteWebDriver>> BetweenDoActions { get; } = new List<Action<RemoteWebDriver>>();
+
         public ILogger Log { get; set; } = new EmptyLogger();
     }
 }

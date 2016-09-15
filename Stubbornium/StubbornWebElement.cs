@@ -176,13 +176,16 @@ namespace Stubbornium
             
             configuration.Log.Info(logMessage ?? caller);
 
-            configuration.BeforeDoActions.ForEach(action => action(browser));
-
             var wait = new WebDriverWait(browser, waitTime.ToTimeSpan());
             int attemptNo = 0;
             while (true)
             {
+                configuration.BeforeDoActions.ForEach(action => action(browser));
+
                 var actionException = Try(() => seleniumAction(webElementSource));
+
+                configuration.BetweenDoActions.ForEach(action => action(browser));
+
                 var expectedConditionException = Try(() => wait.Until(expectedConditionAfterAction, webElementSource));
 
                 if (actionException == null && expectedConditionException == null)
