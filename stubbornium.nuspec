@@ -12,8 +12,8 @@
   <requireLicenseAcceptance>false</requireLicenseAcceptance>
   <description>Library for robust UI test</description>
   <releaseNotes></releaseNotes>
-  <copyright>Copyright Mandro 2016</copyright>    
-  <tags>Selenium Testing</tags>
+  <copyright>Copyright Marcin Drobik 2016</copyright>    
+  <tags>Selenium Testing browser automation</tags>
   @dependencies@
   @references@
   </metadata>
