@@ -3,7 +3,7 @@ using System.Runtime.Serialization;
 
 namespace Stubbornium
 {
-    internal static class Assertions
+    public static class Assertions
     {
         public static void AreEqual(bool expected, bool actual, string message = null)
         {

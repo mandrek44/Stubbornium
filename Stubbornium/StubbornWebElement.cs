@@ -119,7 +119,7 @@ namespace Stubbornium
         {
             Do(
                 element => Assertions.AreEqual(true, element().Displayed),
-                _ => true,
+                element => element().Displayed,
                 ExpectedConditions.ElementIsVisible(_selector),
                 logMessage: "Is visible");
         }

@@ -18,10 +18,9 @@
         $('#change-title').click(function () {
             setTimeout(function () {
                 $('h1').text($('#new-title').val())
-            }, 2000);
-
-            $('#change-title-panel').hide();
-            $('#reset-title').show();
+                $('#change-title-panel').hide();
+                $('#reset-title').show();
+            }, 200);
         });
         
         $('#reset-title').click(function () {

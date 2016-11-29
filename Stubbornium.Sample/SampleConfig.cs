@@ -18,7 +18,7 @@ namespace Stubbornium.Sample
         public static StubbornBrowser Browser { get; private set; }
         public static RemoteWebDriver WebDriver { get; private set; }
 
-        public static string BaseAddress => "http://localhost:12345";
+        public static string BaseAddress => "http://localhost:22345";
 
         [OneTimeSetUp]
         public void StartWebServer()

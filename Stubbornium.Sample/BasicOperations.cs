@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using Stubbornium.Sample.Utils;
@@ -55,13 +56,19 @@ namespace Stubbornium.Sample
             Browser.Find.TagName("h1")
                 .AssertHasText("Test");
 
-            Browser.Find.Id("change-title")
-                .ClickToAppear(By.Id("reset-title"))
-                .ClickToClose();
+            var resetTitle = Browser.Find.Id("change-title")
+                .ClickToAppear(By.Id("reset-title"));
+
+            Browser.Find.Id("reset-title").AssertIsVisible();
+
+            resetTitle.ClickToClose();
+
+            Assert.Throws<Assertions.AssertionException> (() => Browser.Find.Id("reset-title").AssertIsVisible());
 
             Browser.Find.TagName("h1")
                 .AssertHasText("Test");
         }
+        
 
         [Test]
         public void Assert_title_changes_to_input_value()
