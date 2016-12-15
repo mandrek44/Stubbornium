@@ -77,12 +77,13 @@ namespace Stubbornium
                 logMessage: "\"" + content + "\"");
         }
 
-        public void Click<TResult>(Func<Func<IWebElement>, TResult> expectedConditionAfterAction)
+        public void Click<TResult>(Func<Func<IWebElement>, TResult> expectedConditionAfterAction, WaitTime waitTime = WaitTime.Short)
         {
             Do(
                 element => element().Click(),
                 expectedConditionAfterAction,
-                ExpectedConditions.ElementIsVisible(_selector));
+                ExpectedConditions.ElementIsVisible(_selector),
+                waitTime: waitTime);
         }
 
         public void ClickButton<TResult>(Func<Func<IWebElement>, TResult> expectedConditionAfterAction)
