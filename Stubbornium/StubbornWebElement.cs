@@ -106,7 +106,7 @@ namespace Stubbornium
         {
             Assert(e =>
             {
-                Assertions.AreNotEqual(null, e, message);
+                Assertions.AreNotEqual(null, e(), message);
                 return true;
             }, message ?? "Exists");
         }
