@@ -15,9 +15,9 @@ namespace Stubbornium
         }
 
         public static StubbornWebElement ClickToOpen(this StubbornWebElement element, By expectedPopupElement,
-            Func<IWebElement, bool> predicate = null)
+            Func<IWebElement, bool> predicate = null, WaitTime waitTime = WaitTime.Short)
         {
-            element.Click(webElement => ElementIsVisible(webElement().Driver(), expectedPopupElement, predicate));
+            element.Click(webElement => ElementIsVisible(webElement().Driver(), expectedPopupElement, predicate), waitTime: waitTime);
             return new StubbornWebElement(expectedPopupElement, element);
         }
 
